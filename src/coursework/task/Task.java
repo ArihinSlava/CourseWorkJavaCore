@@ -1,7 +1,12 @@
 package coursework.task;
 
+import coursework.exceptions.IncorrectArgumentException;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Objects;
 
 public abstract class Task  {
@@ -10,16 +15,22 @@ public abstract class Task  {
     private String title;
     private final Type type;
     private final int id;
-    private final LocalDateTime dateTime;
+    private LocalDateTime dateTime;
     private String description;
 
 
-    public Task(String title, Type type, LocalDateTime dateTime, String description) {
+    public Task(String title, Type type, String dateTime, String description) {
         this.title = title;
         this.type = type;
         this.id = idGenerator++;
-        this.dateTime = dateTime;
         this.description = description;
+        try {
+            setDateTime(dateTime);
+        } catch (IncorrectArgumentException e) {
+            System.out.println();
+            System.out.println(e.getMessage());
+        }
+
     }
 
     public String getTitle() {
@@ -36,6 +47,20 @@ public abstract class Task  {
 
     public LocalDateTime getDateTime() {
         return dateTime;
+    }
+
+
+
+    public void setDateTime(String dateTime) throws IncorrectArgumentException {
+        boolean check = true;
+        try {
+            this.dateTime = LocalDateTime.parse(dateTime, DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
+        } catch (DateTimeParseException e) {
+            check = false;
+        }
+        if (!check) {
+            throw new IncorrectArgumentException("Неккоректно указана дата добавьте задачу повторно");
+        }
     }
 
     public String getDescription() {
@@ -67,11 +92,11 @@ public abstract class Task  {
 
     @Override
     public String toString() {
-        return "Task{" +
-                "title='" + getTitle() +
-                "\n Description: " + getDescription() +
-                "\n Date: " + getDateTime() +
-                "\n Type of task: " + getType().getType();
+        return "id задачи" + id + "\n" +
+                "Тип задачи: " + type + "\n" +
+                "Время задачи: " + dateTime.format(DateTimeFormatter.ofPattern("HH:mm")) + "\n" +
+                "Наименование: " + title + "\n" +
+                "Описание: " + description + "\n";
 
     }
 }
